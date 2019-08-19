@@ -20,7 +20,7 @@ public class ChatMessage implements Serializable {
 	// 	- LOGIN_LIST : 현재 로그인한 사용자 리스트.
 	//		메시지 포맷 : LOGIN_LIST, "", "", "/로 구분된 사용자 리스트"
 	public enum MsgType {NO_ACT, LOGIN, LOGOUT, CLIENT_MSG, LOGIN_FAILURE, SERVER_MSG, LOGIN_LIST
-							,MOVING,DICE_NUM,BUILD_UP,COUNTER_PART,START};
+							,MOVING,DICE_NUM,BUILD_UP,COUNTER_PART,START,FINISHED};
 							//DICE_NUM=turn제어
 							//MOVING=상대케릭터그리기
 							//BUILD_UP=건물그리기/건물소유자지정/남의건물이면 돈뻇기게

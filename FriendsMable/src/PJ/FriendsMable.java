@@ -2,6 +2,7 @@ package PJ;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -30,7 +31,7 @@ import javax.swing.Timer;
 
 import PJ.ChatMessage;
 
-public class KaKaOMable extends JPanel {
+public class FriendsMable extends JPanel {
 	BGM GAME_BGM;
 	BGM MABLE_BGM =new BGM("MABLE_BGM.mp3",true);
 	BGM SELECTED_BGM;
@@ -38,8 +39,7 @@ public class KaKaOMable extends JPanel {
 	int dice,dice1,dice2,turn=15;
 	int tmp_x, tmp_y ,motion_tmp=0;//주사위 모션 x,y
 	int touch=0;//대화창 열고닫고할수있게하는변수
-	int bx,by;
-	int b=0;
+	int bx,by; //건물 build의 x,y좌표 
 	Timer diceMotion;
 
 	Image StartBackground=new ImageIcon("src/Image/StartBackground_Title.png").getImage();
@@ -48,7 +48,7 @@ public class KaKaOMable extends JPanel {
 	boolean startcheck=false;
 	boolean myturn=true;
 	boolean colorblue=false;
-
+	boolean finish =false;
 	//startPanel 이미지-------------------------------------------------------------------------
 	JButton loginButton=new JButton(new ImageIcon("src/Image/loginButton.png"));
 	JButton startButton=new JButton(new ImageIcon("src/Image/StartButton.png"));
@@ -115,6 +115,7 @@ public class KaKaOMable extends JPanel {
 	ImageIcon countten3=new ImageIcon("src/Image/13.png");
 	ImageIcon countten4=new ImageIcon("src/Image/14.png");
 	ImageIcon end=new ImageIcon("src/Image/end.png");
+	ImageIcon finished=new ImageIcon("src/Image/finished.png");
 	//프로필 캐릭터사진 & 프로필창 이미지 
 	ImageIcon proLion=new ImageIcon("src/Image/proLion.png");
 	ImageIcon proTube=new ImageIcon("src/Image/proTube.png");
@@ -122,6 +123,7 @@ public class KaKaOMable extends JPanel {
 	Image proRed=new ImageIcon("src/Image/proRed.png").getImage();
 	Image proBule=new ImageIcon("src/Image/proBlue.png").getImage();
 
+	JLabel finishedLabel =new JLabel(finished);
 	JLabel doubleDice=new JLabel(new ImageIcon("src/Image/double.PNG"));
 	JLabel countdown=new JLabel(new ImageIcon("src/Image/15.png"));
 	JLabel DiceMotion=new JLabel(new ImageIcon("src/Image/motion (1).PNG"));
@@ -143,17 +145,23 @@ public class KaKaOMable extends JPanel {
 	JScrollPane cScroller = new JScrollPane(counterParts);
 
 	//캐릭터정보
-	int nowSelected=0;
 	PosImageIcon topprofile=new PosImageIcon("src/Image/proBlue.png",0,0,250,150);
 	PosImageIcon bottomprofile=new PosImageIcon("src/Image/proRed.png",645,455,250,150);
-	int x,y;
 	PosImageIcon userch;
 	PosImageIcon userpro;
 	PosImageIcon counterPartch;
 	PosImageIcon counterPartpro;
+	int x,y;
+	int nowSelected=0;	
 	Map sendMap;
 	Characters ch;
 	Characters cp;
+	//승리자
+	String winnerName;
+	int winnerGain;
+	int winnerMoney;
+	PosImageIcon winnerPro ;
+	PosImageIcon winnerPanel=new PosImageIcon("src/Image/finished.png",300,200,300,233);
 	//주사위모션
 	ImageIcon motion[]= {
 			new ImageIcon("src/Image/motion (1).PNG"),
@@ -164,7 +172,7 @@ public class KaKaOMable extends JPanel {
 			new ImageIcon("src/Image/motion (6).PNG")
 	};
 
-	public KaKaOMable(ObjectOutputStream writer,ObjectInputStream reader) {
+	public FriendsMable(ObjectOutputStream writer,ObjectInputStream reader) {
 		this.writer = writer;
 		this.reader = reader;
 		Thread readerThread = new Thread(new IncomingReader());
@@ -391,6 +399,7 @@ public class KaKaOMable extends JPanel {
 				chatingButton.setVisible(true);
 				logoutButton.setVisible(true);
 				countdown.setVisible(true);
+
 				throwButton.setVisible(true);
 				ch.gameName.setBounds(835,560,60,20);
 				ch.gameGain.setBounds(690,555,100,20);
@@ -781,7 +790,7 @@ public class KaKaOMable extends JPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-			doubleDice.setVisible(false);
+				doubleDice.setVisible(false);
 				if(startcheck) {
 					if(myturn) {
 						if(dice1!=dice2)
@@ -799,7 +808,7 @@ public class KaKaOMable extends JPanel {
 							doubleDice.setVisible(true);
 						}
 						else myturn=false;
-					
+
 
 						try {
 							Thread.sleep(300);
@@ -807,7 +816,7 @@ public class KaKaOMable extends JPanel {
 
 						} catch (InterruptedException e1){e1.printStackTrace();}
 						try {
-						
+
 							writer.writeObject(new ChatMessage(ChatMessage.MsgType.DICE_NUM,user,"",dice1+","+dice2+"/"+ch.getGain()));
 							writer.flush();
 
@@ -858,17 +867,17 @@ public class KaKaOMable extends JPanel {
 							userch.moveTo(x,y);
 							if(ch.getlocation()==4) {
 								ch.setGain(-10000);
-								System.out.println("기부지역");
+
 								ch.gameGain.setText(""+ch.getGain());
 							}
 							if(ch.getlocation()/30==0) {
 								ch.setGain(ch.getGain()+300000);
-								System.out.println("월급휙득");
+
 							}
-						
+
 						}
 						try {
-							System.out.println("MOVING메세지 타입보내기");
+
 							writer.writeObject(new ChatMessage(ChatMessage.MsgType.MOVING,user,"",(x+","+y)));
 							writer.flush();
 						}catch(IOException ioe){
@@ -935,11 +944,15 @@ public class KaKaOMable extends JPanel {
 		Dice2.setBounds(430,350,70,70);	
 		countdown.setBounds(415,252,35,35);	
 
-
+	}
+	
+	public void finishedsetup() {
+		finish=true;
+		countdown.setVisible(false);
+		Dice1.setVisible(false);
+		Dice2.setVisible(false);
 	}
 	//setupGUI끝
-
-
 	public void paintComponent(Graphics g) {
 		super.paintComponents(g);	
 		if(whatPanel==0)
@@ -951,9 +964,18 @@ public class KaKaOMable extends JPanel {
 			bottomprofile.draw(g);
 			userch.draw(g);
 			userpro.draw(g);
+
 			if(counterPartch!=null)counterPartch.draw(g);
 			if(counterPartpro!=null)counterPartpro.draw(g);	
-
+			if(finish) {
+				winnerPanel.draw(g);
+				winnerPro.draw(g);
+				g.setColor(Color.BLACK);
+				g.setFont(new Font("Serif",Font.BOLD,25));
+				g.drawString(""+winnerName,330,375);
+				g.drawString(""+winnerGain,510,305);
+				g.drawString(""+winnerMoney,510,260);
+			}
 		}
 
 		this.repaint();
@@ -986,7 +1008,7 @@ public class KaKaOMable extends JPanel {
 
 		dice1=(int)(Math.random()*6)+1;
 		dice2=(int)(Math.random()*6)+1;
-	
+
 		return dice1+dice2;
 	}
 
@@ -1027,8 +1049,7 @@ public class KaKaOMable extends JPanel {
 
 	}
 	public void countMotion() {
-		if(turn==15)System.out.println("게임시작");
-		else if(turn==14) countdown.setIcon(countten4);
+		 if(turn==14) countdown.setIcon(countten4);
 		else if(turn==13) countdown.setIcon(countten3);
 		else if(turn==12) countdown.setIcon(countten2);
 		else if(turn==11) countdown.setIcon(countten1);
@@ -1042,8 +1063,20 @@ public class KaKaOMable extends JPanel {
 		else if(turn==3) countdown.setIcon(countthree);
 		else if(turn==2) countdown.setIcon(counttwo);
 		else if(turn==1) countdown.setIcon(countone);
-		else  countdown.setIcon(end);
-		if(turn<0) JOptionPane.showMessageDialog(null, "게임종료!");
+		else if(turn<=0) { 
+			countdown.setIcon(end);
+			finishedsetup();
+			try {
+				if(ch.getMoney()<cp.getMoney())
+					writer.writeObject(new ChatMessage(ChatMessage.MsgType.FINISHED,user,cp));
+				else 
+					writer.writeObject(new ChatMessage(ChatMessage.MsgType.FINISHED,user,ch));
+				writer.flush();
+			}catch(IOException ioe){
+				JOptionPane.showMessageDialog(null, "메시지 전송중 문제가 발생하였습니다.");
+				ioe.printStackTrace();
+			}
+		}
 	}
 
 	public void mapInit() {
@@ -1076,11 +1109,11 @@ public class KaKaOMable extends JPanel {
 		build.add(new Map(490,435,30,false)); //한국
 	}
 	public void buildup() {
-		
+
 		for(Map m:build) {
 
 			if(m.getlocation()==ch.getlocation()) {
-				if(!cpbuild.contains(m)) {
+				if(!m.own) {
 					if(m.getlocation()>0&&m.getlocation()<=7|| m.getlocation()>15&&m.getlocation()<24) 
 					{
 						if(colorblue)
@@ -1093,37 +1126,36 @@ public class KaKaOMable extends JPanel {
 						else m.setIcon(redbuild2);
 
 					}
-
+					
 					bx=m.getX();
 					by=m.getY();
 					add(m);
-					sendMap=m;
+					m.own=true;
 					m.setBounds(bx,by,50,90);
+					try {
+						
+						writer.writeObject(new ChatMessage(ChatMessage.MsgType.BUILD_UP,user,user,m));
+						writer.flush();
+					}catch(IOException ioe){
+						JOptionPane.showMessageDialog(null, "메시지 전송중 문제가 발생하였습니다.");
+						ioe.printStackTrace();
+					}
 				}else {
 					ch.setGain(-10000);
 					ch.gameGain.setText(""+ch.getGain());
-					System.out.println("남의땅밟음");
 				}
 
 			}
 
 		}
 
-
-		try {
-			System.out.println("BUILD_UP메세지 타입보내기");
-			writer.writeObject(new ChatMessage(ChatMessage.MsgType.BUILD_UP,user,user,sendMap));
-			writer.flush();
-			System.out.println("전해진 Map:"+sendMap);
-		}catch(IOException ioe){
-			JOptionPane.showMessageDialog(null, "메시지 전송중 문제가 발생하였습니다.");
-			ioe.printStackTrace();
-		}
+	
 	}
 
 	public void diceMotion() {
 		tmp_x =0;
 		tmp_y =0;//타이머 x,y좌표
+		
 		//주사위 모션
 		diceMotion=new Timer(50,new ActionListener() {
 
@@ -1142,7 +1174,7 @@ public class KaKaOMable extends JPanel {
 						Thread.sleep(100);
 						DiceMotion.setVisible(false);
 					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
+						
 						e1.printStackTrace();
 					}
 
@@ -1213,6 +1245,14 @@ public class KaKaOMable extends JPanel {
 							startcheck=false;
 							myturn=false;
 						}
+					}else if(type == ChatMessage.MsgType.FINISHED) {
+						Characters win = message.getCh();
+						winnerPro =new PosImageIcon(win.getProImage(),340,250,70,80);
+						winnerName = win.getName();
+						winnerMoney = win.getMoney();
+						winnerGain = win.getGain();
+						finish=true;
+						System.out.println("메세지타입FINISHED -- KAKAO");
 					}
 					else if(type == ChatMessage.MsgType.DICE_NUM) {
 						String tmpCont=message.getContents();
@@ -1235,23 +1275,20 @@ public class KaKaOMable extends JPanel {
 						}
 					}
 					else if(type==ChatMessage.MsgType.BUILD_UP) {
-						String own=message.getContents();
+						String own=message.getSender();
 						Map tmpMap=message.getMap();
 
 						if(tmpMap!=null) {
 							int tmpX=tmpMap.getX();
 							int tmpY=tmpMap.getY();
-							int bindex=build.indexOf(tmpMap);
+							//int bindex=build.indexOf(tmpMap);
 							add(tmpMap);
-							cpbuild.add(tmpMap);
+							//cpbuild.add(tmpMap);
 							tmpMap.setBounds(tmpX,tmpY,50,90);	
-							//build.set(bindex, tmpMap);
 						}
-
-
 						if(!own.equals(user))
 						{
-							ch.setGain(-100000);
+							ch.setGain(-100);
 							ch.gameGain.setText(ch.getGain()+"");
 						}
 					}
@@ -1264,7 +1301,8 @@ public class KaKaOMable extends JPanel {
 				ex.printStackTrace();
 				System.out.println("클라이언트 스레드 종료");		// 프레임이 종료될 경우 이를 통해 스레드 종료
 			}
-		} // close run
+		} 
+		// close run
 
 		// 주어진 String 배열을 정렬한 새로운 배열 리턴
 		private String [] sortUsers(String [] users) {

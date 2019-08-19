@@ -39,7 +39,15 @@ public Characters(String user,String gameImage,String proImage) {
 	gameMoney.setText(""+money);
 	gameGain.setText("gain:  "+gain);
 }
-
+public String getName() {
+	return name;
+}
+public int getMoney() {
+	return money;
+}
+public void setMoney(int gain) {
+	this.money +=gain;
+}
 public String getGameImage() {
 	return gameImage;
 }
